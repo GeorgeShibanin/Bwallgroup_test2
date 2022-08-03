@@ -10,7 +10,7 @@ import (
 
 const RetriesCount = 5
 
-func (h *HTTPHandler) HandlePostUrl(rw http.ResponseWriter, r *http.Request) {
+func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	var data ResponseUser
 	err := json.NewDecoder(r.Body).Decode(&data)

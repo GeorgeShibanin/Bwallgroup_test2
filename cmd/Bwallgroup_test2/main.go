@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/config"
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/handlers"
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage/postgres"
@@ -25,8 +26,8 @@ func NewServer() *http.Server {
 	store = initPostgres()
 
 	handler := handlers.NewHTTPHandler(store)
-	r.HandleFunc("/{shortUrl:\\w{10}}", handler.HandleGetBalance).Methods(http.MethodGet)
-	r.HandleFunc("/", handler.HandlePostUrl)
+	r.HandleFunc("/{user_id:\\w{10}}", handler.HandleGetBalance).Methods(http.MethodGet)
+	r.HandleFunc("/", handler.HandlePostUser)
 	r.HandleFunc("/", handler.HandleNewBalance)
 
 	return &http.Server{

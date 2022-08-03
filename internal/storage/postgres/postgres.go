@@ -38,13 +38,13 @@ func Init(ctx context.Context, host, user, db, password string, port uint16) (*S
 	return initConnection(conn), nil
 }
 
-func (s *StoragePostgres) PutNewUser(ctx context.Context, key storage.ShortedURL, url storage.URL) (storage.ShortedURL, error) {
+func (s *StoragePostgres) PutNewUser(ctx context.Context, client storage.Client, balance storage.Balance) error {
 
 }
 
 func (s *StoragePostgres) GetBalance(ctx context.Context, user_id storage.Client) (storage.Balance, error) {
 }
 
-func (s *StoragePostgres) PatchUserBalance(ctx context.Context, client Client, balance Balance) (Balance, error) {
+func (s *StoragePostgres) PatchUserBalance(ctx context.Context, client storage.Client, balance storage.Balance) (storage.Balance, error) {
 
 }

@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - '8080:8080'
+    container_name: bwallgroup_test2
+    environment:
+      POSTRGES_DBNAME: 'postgres'
+    #      DATABASE_URL: 'postgres://postgres:5432/postgres'
+    depends_on:
+      - database
+    command: [ "/go/src/Bwallgroup_test2/scripts/wait-for-it.sh", "database:5432", "--", "/go/src/Bwallgroup_test2/bin/ozon_test" ]
+
+  database:
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'linksdb'
+    volumes:
+      - './_sql/:/docker-entrypoint-initdb.d/'
