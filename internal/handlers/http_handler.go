@@ -18,7 +18,7 @@ type PutResponseData struct {
 	Result string `json:"result"`
 }
 
-type PutResponseNewUser struct {
+type ResponseUser struct {
 	User    int `json:"user_id"`
 	Balance int `json:"balance"`
 }

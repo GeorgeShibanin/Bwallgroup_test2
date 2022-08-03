@@ -9,13 +9,13 @@ import (
 	"strings"
 )
 
-func (h *HTTPHandler) HandleGetUrl(rw http.ResponseWriter, r *http.Request) {
-
+func (h *HTTPHandler) HandleGetBalance(rw http.ResponseWriter, r *http.Request) {
 	user_id, err := strconv.Atoi(
 		strings.Trim(r.URL.Path, "/"),
 	)
 	if err != nil {
-
+		http.NotFound(rw, r)
+		return
 	}
 	balance, err := h.storage.GetBalance(r.Context(), storage.Client(user_id))
 
@@ -25,7 +25,7 @@ func (h *HTTPHandler) HandleGetUrl(rw http.ResponseWriter, r *http.Request) {
 	}
 	//http.Redirect(rw, r, string(url), http.StatusPermanentRedirect)
 	response := PutResponseData{
-		Result: balance,
+		Result: string(balance),
 	}
 	rawResponse, err := json.Marshal(response)
 	if err != nil {

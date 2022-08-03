@@ -26,7 +26,8 @@ func NewServer() *http.Server {
 
 	handler := handlers.NewHTTPHandler(store)
 	r.HandleFunc("/{shortUrl:\\w{10}}", handler.HandleGetBalance).Methods(http.MethodGet)
-	r.HandleFunc("/", handler.HandleP).Methods(http.MethodGet)
+	r.HandleFunc("/", handler.HandlePostUrl)
+	r.HandleFunc("/", handler.HandleNewBalance)
 
 	return &http.Server{
 		Handler:      r,

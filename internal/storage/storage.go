@@ -6,18 +6,18 @@ import (
 )
 
 var (
-	StorageError = errors.New("storage")
+	StorageError    = errors.New("storage")
+	ErrAlreadyExist = errors.New("client")
 )
 
 type Balance int
 type Client int
 
-type User struct {
-	Id      Client
-	Balance Balance
-}
-
 type Storage interface {
+	//Получение баланса пользователя
 	GetBalance(ctx context.Context, client Client) (Balance, error)
-	PutNewUser(ctx context.Context, client Client, balance Balance) (User, error)
+	//Добавление нового пользователя
+	PutNewUser(ctx context.Context, client Client, balance Balance) error
+	//Изменение баланса пользователя
+	PatchUserBalance(ctx context.Context, client Client, balance Balance) (Balance, error)
 }
