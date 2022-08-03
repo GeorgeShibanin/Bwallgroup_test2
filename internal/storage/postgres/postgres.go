@@ -39,10 +39,39 @@ func Init(ctx context.Context, host, user, db, password string, port uint16) (*S
 }
 
 func (s *StoragePostgres) PutNewUser(ctx context.Context, client storage.Client, balance storage.Balance) error {
-
+	tx, err := s.conn.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return errors.Wrap(err, "can't create tx")
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
+	user := &Client{}
+	err = tx.QueryRow(ctx, GetUserByIDQuery, client).Scan(&user.Id, &user.Balace)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return errors.Wrap(err, "can't get by id")
+	}
+	if user.Id != 0 {
+		return storage.ErrAlreadyExist
+	}
 }
 
 func (s *StoragePostgres) GetBalance(ctx context.Context, user_id storage.Client) (storage.Balance, error) {
+	tx, err := s.conn.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return 0, errors.Wrap(err, "can't create tx")
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
 }
 
 func (s *StoragePostgres) PatchUserBalance(ctx context.Context, client storage.Client, balance storage.Balance) (storage.Balance, error) {
