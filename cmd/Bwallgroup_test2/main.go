@@ -30,12 +30,12 @@ func NewServer() *http.Server {
 	err := initBroker(context.Background(), store, trxBroker)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return &http.Server{}
 	}
 
 	handler := handlers.NewHTTPHandler(store, trxBroker)
-	r.HandleFunc("/{user_id:\\w{1}}", handler.HandleGetBalance).Methods(http.MethodGet)
-	r.HandleFunc("/", handler.HandlePostUser)
+	r.HandleFunc("/{user_id}", handler.HandleGetBalance).Methods(http.MethodGet)
+	r.HandleFunc("/new", handler.HandlePostUser)
 	r.HandleFunc("/trx", handler.HandleNewBalance)
 
 	return &http.Server{

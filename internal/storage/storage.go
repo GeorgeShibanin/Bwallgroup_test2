@@ -8,7 +8,8 @@ import (
 
 var (
 	StorageError    = errors.New("storage")
-	ErrAlreadyExist = errors.New("client")
+	ErrAlreadyExist = errors.New("client_already_exist")
+	ClientNotExist  = errors.New("client_not_exist")
 )
 
 type Balance int64

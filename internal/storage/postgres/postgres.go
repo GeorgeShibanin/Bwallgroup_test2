@@ -6,7 +6,6 @@ import (
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
-	"log"
 	"strconv"
 	"time"
 )
@@ -87,7 +86,7 @@ func (s *StoragePostgres) GetBalance(ctx context.Context, clientID int64) (int64
 	err := s.conn.QueryRow(ctx, GetUserByIDQuery, clientID).
 		Scan(&client.Id, &client.Balace)
 	if err != nil {
-		return 0, fmt.Errorf("something went wrong - %w", storage.StorageError)
+		return 0, fmt.Errorf("something went wrong - %w", err)
 	}
 	return client.Balace, err
 }
@@ -107,10 +106,10 @@ func (s *StoragePostgres) PatchUserBalance(ctx context.Context, clientID, transa
 
 	user := &Client{}
 	//Получаем информацию о клиенте из первой таблицы
-	err = s.conn.QueryRow(ctx, GetUserByIDQuery, clientID).
+	err = tx.QueryRow(ctx, GetUserByIDQuery, clientID).
 		Scan(&user.Id, &user.Balace)
 	if err != nil {
-		return 0, fmt.Errorf("something went wrong - %w", storage.StorageError)
+		return 0, fmt.Errorf("something went wrong - %w", err)
 	}
 	//баланс клиента
 	currentBalance := user.Balace
@@ -122,24 +121,25 @@ func (s *StoragePostgres) PatchUserBalance(ctx context.Context, clientID, transa
 	if err != nil {
 		return 0, errors.Wrap(err, "something went wrong with getting transaction")
 	}
-	//можем ли изменить баланс клиента?
-	if currentBalance+query.OperationSum < 0 {
-		return 0, fmt.Errorf("not enough balance - %w", storage.StorageError)
-	}
 
 	//обновляем статуст транзакции
-	tag, err := s.conn.Exec(ctx, UpdateStatusQuery, true, transactionID)
+	tag, err := tx.Exec(ctx, UpdateStatusQuery, true, transactionID)
 	if err != nil {
-		return 0, fmt.Errorf("cant update balance - %w", storage.StorageError)
+		return 0, fmt.Errorf("cant update balance - %w", err)
 	}
 	if tag.RowsAffected() != 1 {
 		return 0, errors.Wrap(err, fmt.Sprintf("unexpected rows affected value: %v", tag.RowsAffected()))
 	}
 
+	//можем ли изменить баланс клиента?
+	if currentBalance+query.OperationSum < 0 {
+		return 0, fmt.Errorf("not enough balance - %w", storage.StorageError)
+	}
+
 	//обновляем значения для клиента
-	tag, err = s.conn.Exec(ctx, UpdateBalanceQuery, currentBalance+query.OperationSum, clientID)
+	tag, err = tx.Exec(ctx, UpdateBalanceQuery, currentBalance+query.OperationSum, clientID)
 	if err != nil {
-		return 0, fmt.Errorf("cant update balance - %w", storage.StorageError)
+		return 0, fmt.Errorf("cant update balance - %w", err)
 	}
 	if tag.RowsAffected() != 1 {
 		return 0, errors.Wrap(err, fmt.Sprintf("unexpected rows affected value: %v", tag.RowsAffected()))
@@ -154,7 +154,10 @@ func (s *StoragePostgres) CreateTransaction(ctx context.Context, clientID, amoun
 	err := s.conn.QueryRow(ctx, InsertTransactionQuery, clientID, amount, false, time.Now().UTC().Format(time.RFC3339)).
 		Scan(&query.Id)
 	if err != nil {
-		return 0, fmt.Errorf("cant add new transaction - %w", storage.StorageError)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, fmt.Errorf("cant add new transaction - %w", storage.ClientNotExist)
+		}
+		return 0, fmt.Errorf("cant add new transaction - %w", err)
 	}
 	return query.Id, nil
 }
@@ -163,15 +166,13 @@ func (s *StoragePostgres) GetActiveTransactions(ctx context.Context) ([]*storage
 	trxs := make([]*storage.Transaction, 0)
 	rows, err := s.conn.Query(ctx, GetActiveTransactionQuery)
 	if err != nil {
-		log.Println("cant get active trx")
-		return nil, fmt.Errorf("cant get active transaction %w", storage.StorageError)
+		return nil, fmt.Errorf("cant get active transaction %w", err)
 	}
 
 	for rows.Next() {
 		trx := &storage.Transaction{}
 		err = rows.Scan(&trx.Id, &trx.IdClient, &trx.OperationSum, &trx.OperationAccepted, &trx.CreatedAt)
 		if err != nil {
-			log.Println("wrong scan")
 			return nil, fmt.Errorf("cant scan rows in every active transaction - %w", err)
 		}
 		trxs = append(trxs, trx)

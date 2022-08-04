@@ -11,7 +11,7 @@ services:
     #      DATABASE_URL: 'postgres://postgres:5432/postgres'
     depends_on:
       - database
-    command: [ "/go/src/Bwallgroup_test2/scripts/wait-for-it.sh", "database:5432", "--", "/go/src/Bwallgroup_test2/bin/ozon_test" ]
+    command: [ "/go/src/Bwallgroup_test2/scripts/wait-for-it.sh", "database:5432", "--", "/go/src/Bwallgroup_test2/bin/Bwallgroup_test2" ]
 
   database:
     image: postgres:latest
@@ -20,6 +20,6 @@ services:
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
-      POSTGRES_DB: 'linksdb'
+      POSTGRES_DB: 'postgres'
     volumes:
       - './_sql/:/docker-entrypoint-initdb.d/'

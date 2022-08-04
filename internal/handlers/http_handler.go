@@ -21,7 +21,12 @@ type PutResponseData struct {
 	Balance string `json:"balance"`
 }
 
-type ResponseUser struct {
+type HandlerNameRequest struct {
+	User    int64 `json:"user_id"`
+	Balance int64 `json:"balance"`
+}
+
+type HandlerNameResposne struct {
 	User    int64 `json:"user_id"`
 	Balance int64 `json:"balance"`
 }

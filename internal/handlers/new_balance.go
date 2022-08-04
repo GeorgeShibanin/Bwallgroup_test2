@@ -11,7 +11,7 @@ import (
 
 func (h *HTTPHandler) HandleNewBalance(rw http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	var data ResponseUser
+	var data HandlerNameResposne
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)

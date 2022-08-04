@@ -11,10 +11,14 @@ import (
 
 func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	var data ResponseUser
+	var data HandlerNameRequest
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if data.Balance < 0 {
+		http.Error(rw, "wrong balance", http.StatusBadRequest)
 		return
 	}
 	putErr := h.storage.PutNewUser(ctx, data.User, data.Balance)
@@ -23,7 +27,7 @@ func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, putErr.Error(), http.StatusInternalServerError)
 	}
 
-	response := ResponseUser{
+	response := HandlerNameResposne{
 		User:    data.User,
 		Balance: data.Balance,
 	}

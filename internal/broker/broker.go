@@ -31,13 +31,13 @@ func InitBroker(st storage.Storage) *Broker {
 }
 
 func (b *Broker) ApplyTransaction(trx Transaction) {
-	fmt.Println("ApplyTransaction: ", trx) // удалить после тестов
+	fmt.Println("ApplyTransaction: ", trx)
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 
 	query, ok := b.queries[trx.ClientID]
 	if !ok || query == nil {
-		fmt.Println("query initialization: ", trx) // удалить после тестов
+		fmt.Println("query initialization: ", trx)
 		query = InitQuery()
 		b.queries[trx.ClientID] = query
 	}
@@ -50,21 +50,21 @@ func (b *Broker) ApplyTransaction(trx Transaction) {
 }
 
 func (b *Broker) initReader(q *Query) {
-	fmt.Println("initReader: ", q) // удалить после тестов
+	fmt.Println("initReader: ", q)
 	q.Activate()
 	defer q.Deactivate()
 	for {
 		select {
 		case trx := <-q.GetChannel():
-			fmt.Println("update balance: ", trx.ClientID) // удалить после тестов
+			fmt.Println("update balance: ", trx.ClientID)
 
 			_, err := b.storage.PatchUserBalance(context.Background(), trx.ClientID, trx.ID)
 			if err != nil {
 				log.Printf("can't process transaction: %s", err.Error())
 			}
 
-		case <-time.After(3 * time.Second): // Думаю можно бахнуть минуту
-			fmt.Println("deactivate query") // удалить после тестов
+		case <-time.After(3 * time.Second):
+			fmt.Println("deactivate query")
 			return
 		}
 	}
