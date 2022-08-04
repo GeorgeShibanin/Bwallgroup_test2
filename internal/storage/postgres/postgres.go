@@ -155,7 +155,7 @@ func (s *StoragePostgres) CreateTransaction(ctx context.Context, clientID, amoun
 		Scan(&query.Id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, fmt.Errorf("cant add new transaction - %w", storage.ClientNotExist)
+			return 0, fmt.Errorf("client not exist - %w", storage.ClientNotExist)
 		}
 		return 0, fmt.Errorf("cant add new transaction - %w", err)
 	}

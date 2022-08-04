@@ -23,7 +23,7 @@ func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 	}
 	putErr := h.storage.PutNewUser(ctx, data.User, data.Balance)
 	if putErr != nil && !errors.Is(putErr, storage.ErrAlreadyExist) {
-		putErr = errors.Wrap(putErr, "can't put url")
+		putErr = errors.Wrap(putErr, "can't put user")
 		http.Error(rw, putErr.Error(), http.StatusInternalServerError)
 	}
 
