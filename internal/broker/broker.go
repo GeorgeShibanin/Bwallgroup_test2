@@ -17,14 +17,13 @@ type Transaction struct {
 }
 
 type Broker struct {
-	mutex   sync.Mutex
+	mutex   sync.RWMutex
 	queries map[int64]*Query
 	storage storage.Storage
 }
 
 func InitBroker(st storage.Storage) *Broker {
 	return &Broker{
-		mutex:   sync.Mutex{},
 		queries: make(map[int64]*Query),
 		storage: st,
 	}
@@ -34,7 +33,6 @@ func (b *Broker) ApplyTransaction(trx Transaction) {
 	fmt.Println("ApplyTransaction: ", trx)
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-
 	query, ok := b.queries[trx.ClientID]
 	if !ok || query == nil {
 		fmt.Println("query initialization: ", trx)
@@ -52,6 +50,7 @@ func (b *Broker) ApplyTransaction(trx Transaction) {
 func (b *Broker) initReader(q *Query) {
 	fmt.Println("initReader: ", q)
 	q.Activate()
+
 	defer q.Deactivate()
 	for {
 		select {
