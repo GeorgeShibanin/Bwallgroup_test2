@@ -3,9 +3,10 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
-	"github.com/pkg/errors"
 	"net/http"
+
+	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/broker"
+	"github.com/pkg/errors"
 )
 
 func (h *HTTPHandler) HandleNewBalance(rw http.ResponseWriter, r *http.Request) {
@@ -17,12 +18,22 @@ func (h *HTTPHandler) HandleNewBalance(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	newBalance, err := h.storage.PatchUserBalance(ctx, storage.Client(data.User),
-		storage.Balance(data.Balance))
+	trxID, err := h.storage.CreateTransaction(ctx, data.User, data.Balance)
+	if err != nil {
+		err = errors.Wrap(err, "can't create trx")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	response := ResponseUser{
-		User:    data.User,
-		Balance: int(newBalance),
+	h.broker.ApplyTransaction(broker.Transaction{
+		ID:       trxID,
+		ClientID: data.User,
+		Amount:   data.Balance,
+	})
+
+	response := ResponseTrx{
+		User:          data.User,
+		TransactionID: trxID,
 	}
 	rawResponse, err := json.Marshal(response)
 	if err != nil {

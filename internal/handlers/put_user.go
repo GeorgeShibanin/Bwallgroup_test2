@@ -3,12 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
 	"github.com/pkg/errors"
-	"net/http"
 )
-
-const RetriesCount = 5
 
 func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
@@ -18,7 +17,7 @@ func (h *HTTPHandler) HandlePostUser(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	putErr := h.storage.PutNewUser(ctx, storage.Client(data.User), storage.Balance(data.Balance))
+	putErr := h.storage.PutNewUser(ctx, data.User, data.Balance)
 	if putErr != nil && !errors.Is(putErr, storage.ErrAlreadyExist) {
 		putErr = errors.Wrap(putErr, "can't put url")
 		http.Error(rw, putErr.Error(), http.StatusInternalServerError)

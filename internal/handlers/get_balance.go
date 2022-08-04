@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
 	"github.com/pkg/errors"
 	"net/http"
 	"strconv"
@@ -10,22 +9,22 @@ import (
 )
 
 func (h *HTTPHandler) HandleGetBalance(rw http.ResponseWriter, r *http.Request) {
-	user_id, err := strconv.Atoi(
+	clientID, err := strconv.Atoi(
 		strings.Trim(r.URL.Path, "/"),
 	)
 	if err != nil {
 		http.NotFound(rw, r)
 		return
 	}
-	balance, err := h.storage.GetBalance(r.Context(), storage.Client(user_id))
 
+	balance, err := h.storage.GetBalance(r.Context(), int64(clientID))
 	if err != nil {
 		http.NotFound(rw, r)
 		return
 	}
-	//http.Redirect(rw, r, string(url), http.StatusPermanentRedirect)
+
 	response := PutResponseData{
-		Result: string(balance),
+		Balance: strconv.FormatInt(balance, 10),
 	}
 	rawResponse, err := json.Marshal(response)
 	if err != nil {

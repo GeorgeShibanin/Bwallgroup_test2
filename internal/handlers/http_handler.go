@@ -1,24 +1,32 @@
 package handlers
 
 import (
+	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/broker"
 	"github.com/GeorgeShibanin/Bwallgroup_test2/internal/storage"
 )
 
 type HTTPHandler struct {
 	storage storage.Storage
+	broker  *broker.Broker
 }
 
-func NewHTTPHandler(storage storage.Storage) *HTTPHandler {
+func NewHTTPHandler(st storage.Storage, br *broker.Broker) *HTTPHandler {
 	return &HTTPHandler{
-		storage: storage,
+		storage: st,
+		broker:  br,
 	}
 }
 
 type PutResponseData struct {
-	Result string `json:"result"`
+	Balance string `json:"balance"`
 }
 
 type ResponseUser struct {
-	User    int `json:"user_id"`
-	Balance int `json:"balance"`
+	User    int64 `json:"user_id"`
+	Balance int64 `json:"balance"`
+}
+
+type ResponseTrx struct {
+	User          int64 `json:"user_id"`
+	TransactionID int64 `json:"transactionID"`
 }

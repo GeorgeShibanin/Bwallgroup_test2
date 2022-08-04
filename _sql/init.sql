@@ -5,7 +5,7 @@ create table client  (
 
 create table query  (
                          id int primary key auto_increment,
-                         id_client int
+                         client_id int
                          operation_sum int
                          operation_accepted boolean
                          created_at   date
